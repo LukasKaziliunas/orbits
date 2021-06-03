@@ -1,0 +1,11 @@
+{
+	"compilerOptions": {
+		"target": "esnext",
+		"types": [
+            "three"
+		],
+		"watch": true,
+		"outDir": "js",
+	},
+	"include": [ "typescript/*.ts" ],
+}
