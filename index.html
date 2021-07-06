@@ -6,8 +6,8 @@
     <title>Document</title>
 </head>
 <body>
-    
-    <script src="https://threejs.org/build/three.js"></script>
+    <div id="info"> <span style="color: white;"> To move the camera, click and drag the mouse, use scroll wheel to change speed, click A, W, S, D to move </span> </div>
+    <script src="js/three.min.js"></script>
    <!-- <script src="js/OrbitControls.js"></script> -->
     <script src="js/PointerLockControls.js"></script>
     <script src="js/gui.js"></script>
@@ -23,6 +23,22 @@ Margin:0;
 Padding:0;
 Border:0;
 }
+
+#info {
+	position: absolute;
+	top: 0px;
+	width: 100%;
+	padding: 10px;
+	box-sizing: border-box;
+	text-align: center;
+	-moz-user-select: none;
+	-webkit-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	pointer-events: none;
+	z-index: 1; /* TODO Solve this in HTML */
+}
+
 
 body{
     background-color: black;

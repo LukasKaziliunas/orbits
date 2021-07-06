@@ -1,6 +1,19 @@
 class Sphere {
+    // @ts-ignore
+    mesh;
+    r; // radius
+    id;
+    mass; //mass
+    gravityVelocityVector;
+    inertiaVelocity; //orbital velocity by default 
+    inertiaVelocityVector;
+    velocityVector; //final velocity when added gravity and orbital
+    velocityArrow; //red
+    gravityArrow; //green
+    inertiaArrow; // blue
+    gVelArrow; // purple
+    prevTime2 = performance.now();
     constructor(r, x, y, z, mass, texture, id) {
-        this.prevTime2 = performance.now();
         const geometry = new THREE.SphereGeometry(r, 32, 32);
         let material;
         if (texture.color) {
@@ -43,6 +56,7 @@ class Sphere {
                 this.mesh.position.x += this.velocityVector.x / 1000000000 * t;
                 this.mesh.position.y += this.velocityVector.y / 1000000000 * t;
                 this.mesh.position.z += this.velocityVector.z / 1000000000 * t;
+                this.mesh.rotation.y += 0.01;
             }
             this.prevTime2 = performance.now();
         }
@@ -158,7 +172,6 @@ class Sphere {
 //********************************************************** */
 //1 unit = 1000 000 km
 const G = 0.0000000000667; //gravitacine konstanta
-var cameraSpeed = 1;
 let camera, scene, renderer;
 let controls;
 var grid = new THREE.GridHelper(10000, 100, 0xffffff, 0xffffff);
@@ -170,6 +183,7 @@ const params = {
     increaseSize: false,
     allowCollisions: true,
     timeMultiplier: 1,
+    cameraSpeed: 1
 };
 init();
 animate();
@@ -211,7 +225,7 @@ function animate() {
         object.update(objects);
     });
     renderer.render(scene, camera);
-    console.log("speed " + cameraSpeed);
+    //console.log("speed " + cameraSpeed )
 }
 function roundPrecised(number, precision) {
     var power = Math.pow(10, precision);
@@ -344,22 +358,23 @@ function clamp(number, min, max) {
 function addGui() {
     // @ts-ignore
     const gui = new dat.GUI();
-    gui.add(params, 'showGrid').name('Grid (G) ').onChange(function (value) {
+    gui.add(params, 'showGrid').name('Grid ').onChange(function (value) {
         toggleGrid();
     });
-    gui.add(params, 'showArrows').name('Vectors (A)').onChange(function (value) {
+    gui.add(params, 'showArrows').name('Vectors').onChange(function (value) {
         if (!value) {
             objects.forEach(object => {
                 object.removeArrows();
             });
         }
     });
-    gui.add(params, 'increaseSize').name('Increase sizes (R) ').onChange(function (value) {
+    gui.add(params, 'increaseSize').name('Increase sizes ').onChange(function (value) {
         toggleSize();
     });
     gui.add(params, 'allowCollisions').name('Collisions ').onChange(function (value) { });
-    gui.add(params, 'timeMultiplier', 1, 150000, 1).name('Time speed').onChange(function (value) {
+    gui.add(params, 'timeMultiplier', 0, 150000, 0.01).name('Time rate').onChange(function (value) {
     });
+    gui.add(params, 'cameraSpeed', 0, 100, 0.01).name('Camera speed').listen(); //kai keiciasi reiksme su ratuku, bus pakeista ir slider reiksme automatiskai
 }
 renderer.domElement.addEventListener('mousedown', function () {
     controls.lock();
@@ -369,38 +384,39 @@ renderer.domElement.addEventListener('mouseup', function () {
 });
 renderer.domElement.addEventListener('wheel', function (event) {
     if (event.deltaY < 0) {
-        cameraSpeed += 0.01;
-        cameraSpeed = clamp(cameraSpeed, 0, 100);
+        params.cameraSpeed += 0.01;
+        params.cameraSpeed = clamp(params.cameraSpeed, 0, 100);
     }
     else if (event.deltaY > 0) {
-        cameraSpeed -= 0.01;
-        cameraSpeed = clamp(cameraSpeed, 0, 100);
+        params.cameraSpeed -= 0.01;
+        params.cameraSpeed = clamp(params.cameraSpeed, 0, 100);
     }
 });
 function moveCamera(direction) {
     let cameraDirectionVector = cameraDirection(); //normal vector where camera is pointing
+    let speed = params.cameraSpeed;
     switch (direction) {
         case 1: //up
-            camera.position.x += cameraDirectionVector.x * cameraSpeed;
-            camera.position.y += cameraDirectionVector.y * cameraSpeed;
-            camera.position.z += cameraDirectionVector.z * cameraSpeed;
+            camera.position.x += cameraDirectionVector.x * speed;
+            camera.position.y += cameraDirectionVector.y * speed;
+            camera.position.z += cameraDirectionVector.z * speed;
             break;
         case 2: //down
-            camera.position.x += cameraDirectionVector.x * cameraSpeed * -1;
-            camera.position.y += cameraDirectionVector.y * cameraSpeed * -1;
-            camera.position.z += cameraDirectionVector.z * cameraSpeed * -1;
+            camera.position.x += cameraDirectionVector.x * speed * -1;
+            camera.position.y += cameraDirectionVector.y * speed * -1;
+            camera.position.z += cameraDirectionVector.z * speed * -1;
             break;
         case 3: //right
             let rightVector = turnVectorRight(cameraDirectionVector);
-            camera.position.x += rightVector.x * cameraSpeed;
-            camera.position.y += rightVector.y * cameraSpeed;
-            camera.position.z += rightVector.z * cameraSpeed;
+            camera.position.x += rightVector.x * speed;
+            camera.position.y += rightVector.y * speed;
+            camera.position.z += rightVector.z * speed;
             break;
         case 4: //left
             let lefttVector = turnVectorLeft(cameraDirectionVector);
-            camera.position.x += lefttVector.x * cameraSpeed;
-            camera.position.y += lefttVector.y * cameraSpeed;
-            camera.position.z += lefttVector.z * cameraSpeed;
+            camera.position.x += lefttVector.x * speed;
+            camera.position.y += lefttVector.y * speed;
+            camera.position.z += lefttVector.z * speed;
             break;
     }
 }
